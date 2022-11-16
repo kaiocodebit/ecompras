@@ -1,0 +1,13 @@
+version: '3.1'
+
+services:
+  ecomprasdb:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    container_name: ecomprasdb
+    environment:
+      MYSQL_ROOT_PASSWORD: Umdoistres123
+      MYSQL_DATABASE: ecomprasdb
+    ports:
+      - 33060:3306
