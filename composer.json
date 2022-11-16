@@ -2,18 +2,18 @@
     "name": "kaiocodebit/ecompras",
     "authors": [
         {
-            "name": "Hcode Treinamentos",
-            "email": "suporte@hcode.com.br"
+            "name": "Kaio",
+            "email": "kaio@codebit.com.br"
         }
     ],
     "require": {
-    	"phpmailer/phpmailer":"5.2.22",
-    	"slim/slim":"2.0",
-    	"rain/raintpl":"3.0.0"
+            "phpmailer/phpmailer":"5.2.22",
+            "slim/slim":"2.0",
+            "rain/raintpl":"3.0.0"
     },
     "autoload": {
         "psr-4": {
-            "": "vendor\\kaiocodebit\\php-classes\\src"
+            "kaiocodebit\\": "vendor\\kaiocodebit\\php-classes\\src/"
         }
     }
 }
