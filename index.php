@@ -2,16 +2,17 @@
 
 require_once("vendor/autoload.php");
 
-$app = new \Slim\Slim();
+use \Slim\Slim;
+use \kaiocodebit\Page;
+
+$app = new Slim();
 
 $app->config('debug', true);
 
 $app->get('/', function() {
-	$sql = new \kaiocodebit\DB\Sql();
-	$results = $sql->select("SELECT * FROM users");
-    // echo 'ok';
+	$page = new Page();
 
-	echo json_encode($results);
+	$page->setTpl("index");
 });
 
 $app->run();
