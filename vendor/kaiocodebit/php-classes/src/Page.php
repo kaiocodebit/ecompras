@@ -3,7 +3,6 @@
 namespace kaiocodebit;
 
 use Rain\Tpl;
-
 Class Page {
 
     private $tpl;
@@ -48,7 +47,5 @@ Class Page {
     }
 
 }
-
-
 
 ?>
