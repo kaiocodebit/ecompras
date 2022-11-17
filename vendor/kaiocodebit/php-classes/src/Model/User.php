@@ -8,6 +8,10 @@ use \kaiocodebit\Model;
 class User extends Model {
   const SESSION = "User";
 
+  /*
+    User Auth
+  */
+
   public static function login($login, $password){
     $sql = new Sql();
     $results = $sql->select("SELECT * FROM users WHERE username = :LOGIN", array(
@@ -19,15 +23,12 @@ class User extends Model {
     }
 
     $data = $results[0];
-
     if(password_verify($password, $data['password']) === true){
       $user = new User();
 
       $user->setData($data);
 
       $_SESSION[User::SESSION] = $user->getValues();
-      // var_dump($_SESSION[User::SESSION]);
-      // exit();
       return $user;
     }else{
       throw new \Exception("Usuário inexistente ou senha inválida");
@@ -35,8 +36,6 @@ class User extends Model {
   }
 
   public static function verifyLogin($is_admin = true){
-    // print_r($_SESSION[User::SESSION]);
-    // exit;
     if(
       !isset($_SESSION[User::SESSION])
       ||
@@ -49,7 +48,8 @@ class User extends Model {
       header("Location: /admin/login");
       exit;
     }else{
-      header("Location: /admin");
+      // header("Location: /admin");
+      // exit;
     }
   }
 
@@ -68,5 +68,65 @@ class User extends Model {
     }
   }
 
+  /*
+    Model User
+  */
+
+  public static function listAll(){
+    $sql = new Sql();
+
+    return $sql->select("SELECT * FROM users U INNER JOIN persons P USING(id) ORDER BY P.name");
+    // return $sql->select("SELECT * FROM users U JOIN persons P ON P.id = U.id_person ORDER BY P.name");
+  }
+
+  public function get($id){
+    $sql = new Sql();
+
+    $result = $sql->select("SELECT * FROM users U INNER JOIN persons P USING(id) WHERE U.id = :ID", array(
+      ":ID" => $id
+    ));
+
+    $this->setData($result[0]);
+  }
+
+  public function save(){
+    $sql = new Sql();
+
+    $results = $sql->select("CALL sp_users_save(:pperson, :plogin, :ppassword, :pemail, :pphone, :pis_admin)", 
+    array(
+      ":pperson" => $this->getname(),
+      ":plogin"  => $this->getlogin(),
+      ":ppassword" => $this->getpassword(),
+      ":pemail"  => $this->getemail(),
+      ":pphone"  => $this->getphone(),
+      ":pis_admin" => $this->getis_admin()
+    ));
+
+    $this->setData($results[0]);
+  }
+  
+  public function update(){
+    $sql = new Sql();
+
+    $result = $sql->select("CALL sp_users_update_save(:pid, :pperson, :pusername, :ppassword, :pemail, :pphone, :pis_admin)", array(
+      ":pid" => $this->getid(),
+      ":pperson" => $this->getname(),
+      ":pusername" => $this->getusername(),
+      ":ppassword" => $this->getpassword(),
+      ":pemail" => $this->getemail(),
+      ":pphone" => $this->getphone(),
+      ":pis_admin" => $this->getis_admin(),
+    ));
+
+    return $this->setData($result[0]);
+  }
+
+  public function delete(){
+    $sql = new Sql();
+
+    if($this->getValues()){
+      $sql->select("DELETE FROM users U WHERE U.id = :ID", array(":ID" => $this->getid()));
+    }
+  }
 }
 ?>

@@ -33,7 +33,7 @@ Class Page {
 
     private function setData($data = array()){
         foreach($data as $key => $value){
-            $this->tp1->assign($key, $value);
+            $this->tpl->assign($key, $value);
         }
     }
 
