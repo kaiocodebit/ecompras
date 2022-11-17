@@ -57,6 +57,34 @@ $app->get('/logout', function() {
 /*
 	Admin Users
 */
+
+$app->get('/admin/users/create', function() {	
+	User::verifyLogin();
+	$page = new PageAdmin();
+
+	$page->setTpl("users/users-create");
+	
+});
+
+// Create User
+$app->post('/admin/users/create', function() {	
+	User::verifyLogin();
+	
+	$user = new User();
+
+	$_POST["is_admin"] = (isset($_POST["is_admin"])) ? 1: 0;
+	$_POST["password"] = (isset($_POST["password"])) ? password_hash($_POST["password"], PASSWORD_BCRYPT, [
+		'cost' => 12,
+	]) : NULL;
+
+	$user->setData($_POST);
+
+	$user->save();
+
+	header("Location: /admin/users");
+	exit;
+});
+
 // Update Page
 $app->get('/admin/users/:id/delete', function($id) {	
 	User::verifyLogin();
@@ -65,7 +93,6 @@ $app->get('/admin/users/:id/delete', function($id) {
 	
 	$user->get((int)$id);
 	$user->delete();
-	// $page = new PageAdmin();
 	
 	header("Location: /admin/users");
 	exit;
@@ -115,31 +142,6 @@ $app->get('/admin/users', function() {
 });
 
 // Create User Page
-$app->get('/admin/users/create', function() {	
-	User::verifyLogin();
-	$page = new PageAdmin();
-
-	$page->setTpl("users/users-create");
-	
-});
-
-// Create User
-$app->post('/admin/users/create', function() {	
-	User::verifyLogin();
-	
-	$user = new User();
-
-	$_POST["is_admin"] = (isset($_POST["is_admin"])) ? 1: 0;
-	$_POST["password"] = (isset($_POST["password"])) ? password_hash($_POST["password"], PASSWORD_BCRYPT, [
-		'cost' => 12,
-	]) : NULL;
-	$user->setData($_POST);
-
-	$user->save();
-
-	header("Location: /admin/users");
-	exit;
-});
 
 
 

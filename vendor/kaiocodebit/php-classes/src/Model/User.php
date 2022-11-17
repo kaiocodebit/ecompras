@@ -48,7 +48,7 @@ class User extends Model {
       header("Location: /admin/login");
       exit;
     }else{
-      // header("Location: /admin");
+      header("Location: /admin");
       // exit;
     }
   }
@@ -76,7 +76,6 @@ class User extends Model {
     $sql = new Sql();
 
     return $sql->select("SELECT * FROM users U INNER JOIN persons P USING(id) ORDER BY P.name");
-    // return $sql->select("SELECT * FROM users U JOIN persons P ON P.id = U.id_person ORDER BY P.name");
   }
 
   public function get($id){
@@ -123,10 +122,9 @@ class User extends Model {
 
   public function delete(){
     $sql = new Sql();
-
-    if($this->getValues()){
-      $sql->select("DELETE FROM users U WHERE U.id = :ID", array(":ID" => $this->getid()));
-    }
+    $sql->select("CALL sp_users_delete(:pid)", array(
+      ":pid" => $this->getid(),
+    ));
   }
 }
 ?>
