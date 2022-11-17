@@ -10,7 +10,8 @@ Class Page {
     private $defaults = [
         "header" => true,
         "footer" => true,
-        "data" => []
+        "data" => [],
+        "header_data" => []
     ];
 
     public function __construct($opts = array(), $tpl_dir = "/views/"){
@@ -27,6 +28,7 @@ Class Page {
         $this->tpl = new Tpl;
 
         $this->setData($this->options["data"]);
+        if($this->options["header_data"]) $this->setData($this->options["header_data"]);
         if($this->options["header"] === true) $this->tpl->draw("header");
         
     }

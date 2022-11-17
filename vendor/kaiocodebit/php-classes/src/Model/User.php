@@ -26,6 +26,7 @@ class User extends Model {
     if(password_verify($password, $data['password']) === true){
       $user = new User();
 
+      $user->get((int)$data["id"]);
       $user->setData($data);
 
       $_SESSION[User::SESSION] = $user->getValues();
