@@ -19,8 +19,10 @@ class Category extends Model {
     $result = $sql->select("SELECT * FROM categories C WHERE C.id = :ID", array(
       ":ID" => $id
     ));
-
-    $this->setData($result[0]);
+    
+    if(isset($result[0])){
+      $this->setData($result[0]);
+    }
   }
 
   public function save(){
@@ -33,6 +35,8 @@ class Category extends Model {
     ));
 
     $this->setData($results[0]);
+
+    $this->updateFile();
   }
   
   public function update(){
@@ -51,6 +55,18 @@ class Category extends Model {
     $sql->select("DELETE FROM categories WHERE id = :ID", array(
       ":ID" => $this->getid(),
     ));
+
+    $this->updateFile();
+  }
+
+  public static function updateFile(){
+    $categories = Category::listAll();
+
+    $html = [];
+    foreach ($categories as $category) {
+      array_push($html, '<li><a href="/category/'.$category["id"].'">'. $category["category"] .'</a></li> ');
+    }
+    file_put_contents($_SERVER["DOCUMENT_ROOT"] . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR . "category" . DIRECTORY_SEPARATOR . "category-menu.html" , implode('', $html));
   }
 
 }
