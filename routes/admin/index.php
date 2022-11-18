@@ -17,6 +17,9 @@ include "./routes/admin/auth.php";
 // Users
 include "./routes/admin/users.php";
 
+// Products
+include "./routes/admin/products.php";
+
 // Categories
 include "./routes/admin/categories.php";
 
