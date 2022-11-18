@@ -69,5 +69,59 @@ class Category extends Model {
     file_put_contents($_SERVER["DOCUMENT_ROOT"] . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR . "category" . DIRECTORY_SEPARATOR . "category-menu.html" , implode('', $html));
   }
 
+  public function getProducts($related = true){
+    $sql = new Sql();
+
+    if($related === true){
+      return $sql->select("
+        SELECT * FROM products WHERE id IN (
+          SELECT 
+            P.id
+          FROM 
+            products P 
+          INNER JOIN product_categories PC ON PC.id_product = P.id 
+          WHERE PC.id_category = :ID
+        );
+        ", array(
+          ":ID" => $this->getid()
+        ));
+    }else{
+      return $sql->select("
+        SELECT * FROM products WHERE id NOT IN (
+          SELECT 
+            P.id
+          FROM 
+            products P 
+          INNER JOIN product_categories PC ON PC.id_product = P.id 
+          WHERE PC.id_category = :ID
+        );
+        ", array(
+          ":ID" => $this->getid()
+        ));
+    }
+  }
+
+  public function addProduct(Product $product){
+    $sql = new Sql();
+
+    $product = $product->getValues();
+
+    $sql->select("INSERT INTO product_categories (id_product, id_category) VALUES (:ID_PRODUCT, :ID_CATEGORY)", array(
+      ":ID_PRODUCT" => $product['id'],
+      ":ID_CATEGORY" => $this->getid()
+    ));
+  }
+
+  public function removeProduct(Product $product){
+    $sql = new Sql();
+
+    $product = $product->getValues();
+
+    $sql->select("DELETE FROM product_categories PC WHERE PC.id_product = :ID_PRODUCT AND PC.id_category = :ID_CATEGORY ", array(
+      ":ID_PRODUCT" => $product['id'],
+      ":ID_CATEGORY" => $this->getid()
+    ));
+  }
+
 }
 ?>
