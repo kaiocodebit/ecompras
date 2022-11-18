@@ -136,7 +136,7 @@ class Category extends Model {
         WHERE C.id = :IDCATEGORY
         LIMIT $start, $per_page", 
       array(
-        ":IDCATEGORY" => 8
+        ":IDCATEGORY" => $this->getid()
       ));
 
     $resultTotal = $sql->select("
@@ -144,8 +144,10 @@ class Category extends Model {
       FROM products P 
       INNER JOIN product_categories PC ON PC.id_product = P.id 
       INNER JOIN categories C ON C.id  = PC.id_category 
-      WHERE C.id = 8
-    ");
+      WHERE C.id = :IDCATEGORY
+    ",array(
+      ":IDCATEGORY" => $this->getid()
+    ));
 
     return [
         "data" => Product::checkList($results),
