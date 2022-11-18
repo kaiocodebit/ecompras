@@ -17,6 +17,9 @@ include "./routes/admin/auth.php";
 // Users
 include "./routes/admin/users.php";
 
+// Categories
+include "./routes/admin/categories.php";
+
 // Forgot Password
 include "./routes/admin/forgot.php";
 
