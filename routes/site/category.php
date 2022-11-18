@@ -5,18 +5,31 @@ use kaiocodebit\Model\Product;
 use kaiocodebit\Page;
 
 $app->get('/category/:id', function($id) {
-	$page = new Page();
-
+	
+	$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
+	
 	$category = new Category();
-
+	
 	$category->get((int)$id);
+	
+	$pagination = $category->getProductsPage($page);
 
-	$products = $category->getProducts();
+	$pages = [];
+
+	for ($i=1; $i <= $pagination['pages'] ; $i++) { 
+		array_push($pages, [
+			'link' => '/category/' . $category->getid() . '?page='.$i,
+			'page' => $i
+		]);
+	}
+
+	$page = new Page();
 
 	if($category->getValues()){		
 		$page->setTpl("category/category", array(
 			"category" => $category->getValues(),
-			"products" => Product::checkList($products)
+			"products" => $pagination['data'],
+			"pages" => $pages
 		));
 	}else{
 		$page->setTpl("index");

@@ -123,5 +123,36 @@ class Category extends Model {
     ));
   }
 
+  public function getProductsPage($page = 1, $per_page = 3) {
+    $start = ($page - 1) * $per_page;
+
+    $sql = new Sql();
+    
+    $results = $sql->select("
+        SELECT P.*
+        FROM products P 
+        INNER JOIN product_categories PC ON PC.id_product = P.id 
+        INNER JOIN categories C ON C.id  = PC.id_category 
+        WHERE C.id = :IDCATEGORY
+        LIMIT $start, $per_page", 
+      array(
+        ":IDCATEGORY" => 8
+      ));
+
+    $resultTotal = $sql->select("
+      SELECT COUNT(*) AS total
+      FROM products P 
+      INNER JOIN product_categories PC ON PC.id_product = P.id 
+      INNER JOIN categories C ON C.id  = PC.id_category 
+      WHERE C.id = 8
+    ");
+
+    return [
+        "data" => Product::checkList($results),
+        "total" => (int)$resultTotal[0]['total'],
+        "pages" => ceil((int)$resultTotal[0]['total'] / $per_page)
+      ];
+
+  }
 }
 ?>
