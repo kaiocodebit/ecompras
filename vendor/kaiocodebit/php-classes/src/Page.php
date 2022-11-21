@@ -30,7 +30,7 @@ Class Page {
         $this->setData($this->options["data"]);
         if($this->options["header_data"]) $this->setData($this->options["header_data"]);
         if($this->options["header"] === true) $this->tpl->draw("header");
-        
+
     }
 
     private function setData($data = array()){

@@ -4,7 +4,7 @@ use kaiocodebit\PageAdmin;
 use kaiocodebit\Model\User;
 
 $app->get('/admin', function() {
-	User::checkLogin();
+	// User::checkLogin();
 
 	$page = new PageAdmin();
 

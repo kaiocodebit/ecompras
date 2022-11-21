@@ -8,6 +8,7 @@ use \kaiocodebit\Model;
 class Cart extends Model {
 
   const SESSION = "Cart";
+  const SESSION_ERROR = "CartError";
 
   public function save(){
 
@@ -20,7 +21,7 @@ class Cart extends Model {
       ":pid_user" => $this->getid_user(),
       ":zipcode" => $this->getzipcode(),
       ":pfreight" => $this->getfreight(),
-      ":pdays" => $this->getgetdays()
+      ":pdays" => $this->getdays()
     ));
 
     $this->setData($results[0]);
@@ -46,9 +47,9 @@ class Cart extends Model {
           $data['id_user'] = $user->getid();
           
         }
-        
+
         $cart->setData($data);
-        
+
         $cart->save();
 
         $cart->setToSession();
@@ -93,6 +94,8 @@ class Cart extends Model {
       ":ID_CART" => $this->getid(),
       ":ID_PRODUCT" => $product->getid(),
     ));
+
+    $this->getCalculateTotal();
   }
 
   public function removeProduct(Product $product, $all = false){
@@ -111,6 +114,8 @@ class Cart extends Model {
       ":ID_PRODUCT" => $product->getid(),
     ));
     }
+
+    $this->getCalculateTotal();
   }
 
   public function getProducts()
@@ -130,6 +135,120 @@ class Cart extends Model {
 
     return Product::checkList($row);
   }
+
+  public function getProductsTotals(){
+    $sql = new Sql();
+
+    $results = $sql->select("SELECT 
+    SUM(P.price) as price, SUM(P.width) AS width, SUM(P.height) AS height, SUM(P.length) AS length, SUM(P.weight) AS weight, COUNT(*) AS qtd
+    FROM cart_products CP 
+    INNER JOIN products P ON P.id = CP.id_product
+    WHERE CP.id_cart = :ID_CART
+    AND CP.removed_at IS NULL 
+    ORDER BY P.product", array(
+      "ID_CART" => $this->getid()
+    ));
+    if(count($results) > 0){
+      return $results[0];
+    }else{
+      return [];
+    }
+  }
+
+  public function setFreightZipcode($zipcode)
+  {
+    $zipcodeFormated = isset($zipcode) ? str_replace('-', '', $zipcode) : null;
+    $totals = $this->getProductsTotals();
+
+    if($totals['qtd'] > 0 && isset($zipcodeFormated)){  
+      $qs = http_build_query([
+        "nCdEmpresa" => "",
+        "sDsSenha" => "",
+        "nCdServico" => "40010",
+        "sCepOrigem" => "14407000",
+        "sCepDestino" => $zipcodeFormated,
+        "nVlPeso" => $totals["weight"],
+        "nCdFormato" => 0,
+        "nVlComprimento" => $totals["length"],
+        "nVlAltura" => $totals["height"],
+        "nVlLargura" => $totals["width"],
+        "nVlDiametro" => "0",
+        "sCdMaoPropria" => "S",
+        "nVlValorDeclarado" =>$totals["price"],
+        "sCdAvisoRecebimento" => "S"      
+      ]);
+
+
+      $xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?". $qs);
+      
+      $result = $xml->Servicos->cServico;
+
+      if($result->MsgErro != ''){
+        Cart::setMsgError($result->MsgErro);
+      }else{
+        Cart::resetMsgError();
+      }
+
+      $this->setdays($result->PrazoEntrega);
+      $this->setfreight(Cart::formatValueToDecimal($result->Valor));
+      $this->setzipcode($zipcode);
+
+      $this->save();
+
+      return $result;
+
+    }
+  }
+
+  public function formatValueToDecimal($value) {
+
+    $value =str_replace(".", ".", $value);
+
+    return str_replace(",",".", $value);
+  }
+
+  public static function setMsgError($msg){
+    $_SESSION[Cart::SESSION_ERROR] = $msg;
+  }
+
+  public static function getMsgError(){
+    $msg = isset($_SESSION[Cart::SESSION_ERROR]) ? $_SESSION[Cart::SESSION_ERROR] : "";
+
+    Cart::resetMsgError();
+
+    return $msg;
+  }
+
+  public static function resetMsgError(){
+    $_SESSION[Cart::SESSION_ERROR] = NULL;
+  }
+
+  public function updateFreight(){
+    if($this->getzipcode() != ''){
+      $this->setFreightZipcode($this->getzipcode());
+    }
+  }
+
+  public function getValues()
+  {
+
+    $this->getCalculateTotal();
+
+    return parent::getValues();
+
+  }
+
+  public function getCalculateTotal()
+  {
+    $this->updateFreight();
+    
+    $totals = $this->getProductsTotals();
+
+    $this->setsubtotal($totals['price']);
+    $this->settotal($totals['price'] + $this->getfreight());
+    
+  }
+
 }
 
 ?>

@@ -8,11 +8,11 @@ $app->get('/cart', function() {
 	$page = new Page();
 	
 	$cart = Cart::getFromSession();
-	$cart->getProducts();
 
 	$page->setTpl("cart/cart", [
 		"cart" => $cart->getValues(),
-		"products" =>$cart->getProducts()
+		"products" =>$cart->getProducts(),
+		"error" => Cart::getMsgError()
 	]);
 });
 
@@ -33,7 +33,6 @@ $app->get('/cart/:product_id/add', function($product_id) {
 	header("Location: /cart");
 	exit;
 });
-
 
 
 $app->get('/cart/:product_id/minus', function($product_id) {
@@ -65,6 +64,15 @@ $app->get('/cart/:product_id/remove', function($product_id) {
 });
 
 
+$app->post('/cart/freight', function() {
+
+	$cart = Cart::getFromSession();
+
+	$cart->setFreightZipcode($_POST['zipcode']);
+
+	header("Location: /cart");
+	exit;
+});
 
 
 ?>
