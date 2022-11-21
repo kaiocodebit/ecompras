@@ -29,14 +29,14 @@ class User extends Model {
   }
   
   public static function checkLogin($is_admin = true){
-
+    exit;
     if (
       !isset($_SESSION[User::SESSION])
       ||
       !$_SESSION[User::SESSION]
       ||
       !(int)$_SESSION[User::SESSION]['id'] > 0
-    ) { 
+    ) {
       return false;
     }
 

@@ -86,6 +86,50 @@ class Cart extends Model {
     }
   }
 
+  public function addProduct(Product $product){
+    $sql = new Sql();
+
+    $sql->query("INSERT INTO cart_products (id_cart, id_product) VALUES(:ID_CART, :ID_PRODUCT)", array(
+      ":ID_CART" => $this->getid(),
+      ":ID_PRODUCT" => $product->getid(),
+    ));
+  }
+
+  public function removeProduct(Product $product, $all = false){
+    $sql = new Sql();
+
+    if($all) {
+      $sql->query("UPDATE  cart_products SET  removed_at = NOW() WHERE 
+        id_cart = :ID_CART AND id_product = :ID_PRODUCT", array(
+        ":ID_CART" => $this->getid(),
+        ":ID_PRODUCT" => $product->getid(),
+      ));
+    }else{ 
+      $sql->query("UPDATE  cart_products SET  removed_at = NOW() WHERE 
+        id_cart = :ID_CART AND id_product = :ID_PRODUCT AND removed_at IS NULL LIMIT 1 ", array(
+      ":ID_CART" => $this->getid(),
+      ":ID_PRODUCT" => $product->getid(),
+    ));
+    }
+  }
+
+  public function getProducts()
+  {
+    $sql = new Sql();
+    
+    $row = $sql->select("
+      SELECT P.id, P.product, P.price, P.width, P.height, P.length, P.weight, P.url, COUNT(*) AS qtd, SUM(P.price) AS total
+      FROM cart_products CP 
+      INNER JOIN products P ON P.id = CP.id_product 
+      WHERE CP.id_cart = :ID_CART AND CP.removed_at IS NULL 
+      GROUP BY P.id, P.product, P.price, P.width, P.height, P.length, P.weight
+      ORDER BY P.product
+      ", array(
+      ":ID_CART" => $this->getid()
+    ));
+
+    return Product::checkList($row);
+  }
 }
 
 ?>
