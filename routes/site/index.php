@@ -19,4 +19,6 @@ include "./routes/site/category.php";
 // Product
 include "./routes/site/product.php";
 
+// Cart 
+include "./routes/site/cart.php";
 ?>

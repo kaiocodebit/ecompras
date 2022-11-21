@@ -10,9 +10,47 @@ class User extends Model {
   const SESSION = "User";
   const SECRET = "PassSec2do13*2JZ";
 	const SECRET_IV = "PassSec2do13*2JZ_IV";
+
+  
   /*
     User Auth
   */
+
+
+  public static function getFromSession(){
+
+    $user = new User();
+
+    if (isset($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]['id'] > 0 ) { 
+      $user->setData($_SESSION[User::SESSION]);
+    }
+
+    return $user;
+  }
+  
+  public static function checkLogin($is_admin = true){
+
+    if (
+      !isset($_SESSION[User::SESSION])
+      ||
+      !$_SESSION[User::SESSION]
+      ||
+      !(int)$_SESSION[User::SESSION]['id'] > 0
+    ) { 
+      return false;
+    }
+
+    
+    if($is_admin === true && (bool)$_SESSION[User::SESSION]['is_admin'] === true){
+      return true;
+    } else if ($is_admin === false){
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+
 
   public static function login($login, $password){
     $sql = new Sql();
@@ -39,21 +77,11 @@ class User extends Model {
   }
 
   public static function verifyLogin($is_admin = true){
-    if(
-      !isset($_SESSION[User::SESSION])
-      ||
-      !$_SESSION[User::SESSION]
-      ||
-      !(int)$_SESSION[User::SESSION]['id'] > 0
-      ||
-      (bool)$_SESSION[User::SESSION]['is_admin'] !== $is_admin
-    ){
+    if(User::checkLogin($is_admin)){
       header("Location: /admin/login");
       exit;
-    }else{
-      header("Location: /admin");
-      // exit;
     }
+
   }
 
   public static function verifyIfAuthenticated(){
