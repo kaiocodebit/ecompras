@@ -14,5 +14,9 @@ $app->get('/', function() {
 });
 
 // Categoty
-include "./routes/site/category.php"
+include "./routes/site/category.php";
+
+// Product
+include "./routes/site/product.php";
+
 ?>

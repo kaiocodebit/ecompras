@@ -122,5 +122,29 @@ class Product extends Model {
     $this->checkPhoto();
   }
 
+  public function getProductDetails(){
+    $sql = new Sql();
+    
+    $result = $sql->select("SELECT
+        *
+      FROM 
+        products P
+      WHERE P.id = :ID", array(
+        ":ID" => $this->getid()
+      ));
+
+    return $result[0];
+  }
+
+  public function getCategories(){
+    $sql = new Sql();
+
+    $results =  $sql->select("SELECT * from categories C INNER JOIN product_categories PC ON PC.id_category = C.id WHERE PC.id_product = :IDPRODUCT", 
+    array(
+      ":IDPRODUCT" => $this->getid()
+    ));
+
+    return $results;
+  }
 }
 ?>
